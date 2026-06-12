@@ -1,0 +1,32 @@
+{
+  "name": "mrbogomips-harness",
+  "owner": {
+    "name": "Mr Bogomips",
+    "email": "giovanni.costagliola@gmail.com"
+  },
+  "metadata": {
+    "description": "Marketplace for the agentic-harness Claude Code plugin",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "agentic-harness",
+      "source": "./",
+      "description": "Stand up, assess, and maintain an agentic harness in an existing repo — generate project-specific agent teams and the skills they use, assess how effectively they are used, advise on spec-driven development systems and agent-suited issue trackers, and generate a dual-tracker sync when a repo-native and a human tracker coexist",
+      "version": "0.8.0",
+      "category": "engineering",
+      "tags": [
+        "harness",
+        "agents",
+        "skills",
+        "scaffolding",
+        "orchestration",
+        "multi-agent",
+        "meta-skill",
+        "issue-tracker",
+        "tracker-sync",
+        "spec-driven-development"
+      ]
+    }
+  ]
+}

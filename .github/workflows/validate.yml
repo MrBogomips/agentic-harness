@@ -1,0 +1,29 @@
+name: Validate Plugin
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate manifest syntax
+        run: |
+          jq . .claude-plugin/plugin.json > /dev/null
+          jq . .claude-plugin/marketplace.json > /dev/null
+
+      - name: Run structural validation
+        run: bash tests/run-structural-tests.sh
+
+      # Non-blocking until confirmed to run headless in CI; promote to
+      # blocking by removing continue-on-error once verified green.
+      - name: claude plugin validate (strict)
+        continue-on-error: true
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate . --strict

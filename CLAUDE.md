@@ -6,8 +6,14 @@ Guidance for working in the agentic-harness plugin repository.
 
 This is a single-plugin repository: the repo root is the plugin. `.claude-plugin/` holds both `plugin.json` (the plugin manifest) and `marketplace.json` (a single-plugin marketplace named `mrbogomips-harness`, whose one entry points at `./`).
 
-- **Skills** — `skills/*/SKILL.md` (harness-setup, harness-review, spec-advisor, tracker-advisor)
+- **Skills** — `skills/*/SKILL.md` (harness-setup, harness-review, harness-feedback, spec-advisor, tracker-advisor)
+- **Commands** — `commands/*.md` (`/harness-feedback` — the one deliberate command; everything else is a skill)
 - **Shared knowledge** — `shared/*.md`, referenced from skills as `${CLAUDE_PLUGIN_ROOT}/shared/...`
+- **GitHub config** — `.github/ISSUE_TEMPLATE/feedback.md` (the feedback issue template) and `.github/workflows/` (`validate.yml` for plugin structure, `feedback-check.yml` for feedback-issue validation)
+
+### Feedback format is single-source-of-truth
+
+`shared/feedback-format.md` is canonical for the tool-feedback format: the mandatory sections, the redaction policy, the upstream repo slug, and the body skeleton. The issue template, the `harness-feedback` skill, and the `feedback-check.yml` CI check all mirror it. `tests/validate-feedback.sh` fails the build if they drift — so edit `shared/feedback-format.md` first, then update the mirrors.
 
 ## Versioning
 

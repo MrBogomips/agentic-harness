@@ -318,6 +318,13 @@ wrong order → the orchestrator; missing trigger → a description. The routing
 evolution triggers (recurring feedback, repeated failures, the user bypassing the
 orchestrator) are in `references/maintenance.md`.
 
+Some feedback is not about *this* harness but about the **tool that built it** — a confusing
+step, a missing capability, a bug in the plugin itself. That belongs upstream, not in the
+project's files. When the feedback is of that kind, offer to run `harness-feedback`: it runs a
+short kaizen retrospective and, with the user's explicit consent, files a privacy-safe GitHub
+issue on the agentic-harness repo. Offering is the default; a "no" is fine, and nothing is filed
+without approval.
+
 ## Deliverable checklist
 
 Before calling a setup or change complete:

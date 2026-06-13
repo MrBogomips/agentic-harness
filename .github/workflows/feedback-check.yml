@@ -1,0 +1,137 @@
+name: Feedback issue check
+
+# Validates that tool-feedback issues carry the mandatory sections defined in
+# shared/feedback-format.md, and auto-replies when something is missing.
+# Dependency-light by design: a single actions/github-script step using GITHUB_TOKEN,
+# matching the rest of this repo's CI — no external action, no secrets.
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  validate-feedback:
+    # Only run for issues filed through the feedback template (it auto-applies this label).
+    if: contains(github.event.issue.labels.*.name, 'feedback')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate mandatory sections and respond
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const MARKER = "<!-- feedback-bot -->";
+
+            // mandatory-sections:start  (mirror of shared/feedback-format.md — keep in sync)
+            const REQUIRED = [
+              "Summary",
+              "Type",
+              "What was done",
+              "Choices made",
+              "Expected outcome",
+              "What happened / friction",
+              "Suggested improvement",
+              "Environment",
+            ];
+            // mandatory-sections:end
+
+            const issue = context.payload.issue;
+            const body = issue.body || "";
+
+            // Split the body into "## Heading" -> content sections.
+            const sections = {};
+            let current = null;
+            for (const line of body.split(/\r?\n/)) {
+              const m = line.match(/^##[ \t]+(.+?)\s*$/);
+              if (m) {
+                current = m[1];
+                sections[current] = "";
+              } else if (current !== null) {
+                sections[current] += line + "\n";
+              }
+            }
+
+            // A section is "filled" only if real text remains after dropping HTML-comment
+            // hints and the usual empty-placeholder strings.
+            const isFilled = (text) => {
+              if (text === undefined) return false;
+              const stripped = text.replace(/<!--[\s\S]*?-->/g, "").trim();
+              if (stripped === "") return false;
+              if (/^_no response_$/i.test(stripped)) return false;
+              if (/^todo$/i.test(stripped)) return false;
+              return true;
+            };
+
+            const missing = REQUIRED.filter((h) => !isFilled(sections[h]));
+
+            // Find any prior bot comment to update in place (no comment spam).
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+            });
+            const prior = comments.find((c) => (c.body || "").includes(MARKER));
+
+            const addLabel = async (name) => {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  labels: [name],
+                });
+              } catch (e) { core.warning(`addLabels(${name}): ${e.message}`); }
+            };
+            const removeLabel = async (name) => {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  name,
+                });
+              } catch (e) { /* label not present — ignore */ }
+            };
+
+            let commentBody;
+            if (missing.length > 0) {
+              const list = missing.map((h) => `- [ ] **${h}**`).join("\n");
+              commentBody = [
+                MARKER,
+                "Thanks for the feedback! Before a maintainer can act on it, this issue is missing some **mandatory** information.",
+                "",
+                "Please edit the issue to fill in:",
+                "",
+                list,
+                "",
+                "The section format is documented in [`shared/feedback-format.md`](https://github.com/MrBogomips/agentic-harness/blob/main/shared/feedback-format.md). A section counts as filled once it has real text — an HTML-comment hint or `_No response_` doesn't count. I'll re-check automatically when you edit the issue.",
+              ].join("\n");
+              await addLabel("needs-info");
+            } else {
+              commentBody = [
+                MARKER,
+                "All mandatory sections are filled — thank you! A maintainer will triage this from here. ✅",
+              ].join("\n");
+              await removeLabel("needs-info");
+            }
+
+            if (prior) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: prior.id,
+                body: commentBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: commentBody,
+              });
+            }
+
+            core.info(missing.length > 0 ? `Missing: ${missing.join(", ")}` : "All mandatory sections present");

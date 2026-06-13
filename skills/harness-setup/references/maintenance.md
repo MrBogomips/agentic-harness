@@ -69,9 +69,12 @@ Different feedback lands in different places. Route by type:
 | Team composition | orchestrator + agents | "merge these two" → combine the agents |
 | Missing trigger | the skill description | "it doesn't fire when I phrase it this way" → widen the description |
 | Orchestrator bypassed | the `CLAUDE.md` entry-point directive (then the description) | "I just did it by hand" → strengthen the hard gate, not only the keywords |
+| The tool itself (this plugin) | upstream, via `harness-feedback` | "this step of agentic-harness was confusing" / "the plugin is missing X" → file a feedback issue on the agentic-harness repo, with consent |
 
 The reason this table exists is the separation in the harness model: who, how, and when each
-have one home, so each kind of fault has one place to fix it.
+have one home, so each kind of fault has one place to fix it. The last row is the exception that
+leaves the project: feedback about the tool, not the project's harness, goes upstream — see the
+`harness-feedback` skill.
 
 ## 5. Evolution triggers
 

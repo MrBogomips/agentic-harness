@@ -96,14 +96,21 @@ before publishing. Filling it now means the issue passes the bot on the first tr
 Show the **exact** issue body and the title (`[feedback] {summary}`) and ask for explicit approval.
 Creating a public issue is an outward-facing, hard-to-undo action — never file without a clear yes.
 
-On approval, write the body to a temp file and create the issue against the upstream repo:
+On approval, write the body to a temp file and create the issue against the upstream repo. Keep the
+`[feedback]` title prefix — the CI bot keys on it and applies the `feedback` label itself, so a
+reporter who cannot set labels (a non-collaborator) is still routed. Labelling is best-effort: try
+with the label, and fall back to creating without it if that is rejected.
 
 ```bash
 gh issue create \
   --repo MrBogomips/agentic-harness \
-  --label feedback \
   --title "[feedback] {summary}" \
-  --body-file "{tmpfile}"
+  --label feedback \
+  --body-file "{tmpfile}" \
+  || gh issue create \
+       --repo MrBogomips/agentic-harness \
+       --title "[feedback] {summary}" \
+       --body-file "{tmpfile}"
 ```
 
 **Preflight `gh`.** Only use `gh` if it is present and authenticated — check with `command -v gh`

@@ -15,6 +15,8 @@ This is a single-plugin repository: the repo root is the plugin. `.claude-plugin
 
 `shared/feedback-format.md` is canonical for the tool-feedback format: the mandatory sections, the redaction policy, the upstream repo slug, and the body skeleton. The issue template, the `harness-feedback` skill, and the `feedback-check.yml` CI check all mirror it. `tests/validate-feedback.sh` fails the build if they drift — so edit `shared/feedback-format.md` first, then update the mirrors.
 
+The flow uses two repo labels: `feedback` (marks issues to validate) and `needs-info` (set when an issue is incomplete). The CI bot identifies a feedback issue by the `feedback` label **or** a `[feedback]` title prefix, ensures both labels exist, and applies `feedback` itself — so reporters who cannot set labels (non-collaborators opening via the CLI) are still handled, and a fresh fork self-heals on first use.
+
 ## Versioning
 
 `plugin.json` is the source of truth for the plugin version. The `marketplace.json` entry must carry the same version — `tests/validate-versions.sh` enforces the sync. Bump both together.

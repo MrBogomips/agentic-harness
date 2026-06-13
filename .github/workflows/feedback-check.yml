@@ -4,6 +4,10 @@ name: Feedback issue check
 # shared/feedback-format.md, and auto-replies when something is missing.
 # Dependency-light by design: a single actions/github-script step using GITHUB_TOKEN,
 # matching the rest of this repo's CI — no external action, no secrets.
+#
+# Robustness: a feedback issue is detected by the `feedback` label OR a `[feedback]` title
+# prefix, so reporters who cannot set labels (non-collaborators opening via the CLI) are
+# still handled — the bot ensures the labels exist and applies `feedback` itself.
 
 on:
   issues:
@@ -15,8 +19,6 @@ permissions:
 
 jobs:
   validate-feedback:
-    # Only run for issues filed through the feedback template (it auto-applies this label).
-    if: contains(github.event.issue.labels.*.name, 'feedback')
     runs-on: ubuntu-latest
     steps:
       - name: Validate mandatory sections and respond
@@ -39,6 +41,44 @@ jobs:
             // mandatory-sections:end
 
             const issue = context.payload.issue;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = issue.title || "";
+            const labelNames = (issue.labels || []).map((l) => (typeof l === "string" ? l : l.name));
+
+            // Detect a feedback issue by label OR by the "[feedback]" title prefix, so a
+            // reporter who can't set labels is still covered.
+            const isFeedback = labelNames.includes("feedback") || /^\s*\[feedback\]/i.test(title);
+            if (!isFeedback) {
+              core.info("Not a feedback issue — skipping.");
+              return;
+            }
+
+            // Ensure the labels the flow relies on exist (no-op if already present).
+            const ensureLabel = async (name, color, description) => {
+              try {
+                await github.rest.issues.createLabel({ owner, repo, name, color, description });
+              } catch (e) {
+                if (e.status !== 422) core.warning(`createLabel(${name}): ${e.message}`); // 422 = already exists
+              }
+            };
+            await ensureLabel("feedback", "0E8A16", "Tool-improvement feedback (kaizen)");
+            await ensureLabel("needs-info", "D93F0B", "Feedback issue missing mandatory sections; awaiting more info");
+
+            const addLabel = async (name) => {
+              try {
+                await github.rest.issues.addLabels({ owner, repo, issue_number: issue.number, labels: [name] });
+              } catch (e) { core.warning(`addLabels(${name}): ${e.message}`); }
+            };
+            const removeLabel = async (name) => {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: issue.number, name });
+              } catch (e) { /* label not present — ignore */ }
+            };
+
+            // If routed in by title only, apply the feedback label for consistency.
+            if (!labelNames.includes("feedback")) await addLabel("feedback");
+
             const body = issue.body || "";
 
             // Split the body into "## Heading" -> content sections.
@@ -69,32 +109,9 @@ jobs:
 
             // Find any prior bot comment to update in place (no comment spam).
             const comments = await github.paginate(github.rest.issues.listComments, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue.number,
+              owner, repo, issue_number: issue.number,
             });
             const prior = comments.find((c) => (c.body || "").includes(MARKER));
-
-            const addLabel = async (name) => {
-              try {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  labels: [name],
-                });
-              } catch (e) { core.warning(`addLabels(${name}): ${e.message}`); }
-            };
-            const removeLabel = async (name) => {
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  name,
-                });
-              } catch (e) { /* label not present — ignore */ }
-            };
 
             let commentBody;
             if (missing.length > 0) {
@@ -119,19 +136,9 @@ jobs:
             }
 
             if (prior) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: prior.id,
-                body: commentBody,
-              });
+              await github.rest.issues.updateComment({ owner, repo, comment_id: prior.id, body: commentBody });
             } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                body: commentBody,
-              });
+              await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: commentBody });
             }
 
             core.info(missing.length > 0 ? `Missing: ${missing.join(", ")}` : "All mandatory sections present");

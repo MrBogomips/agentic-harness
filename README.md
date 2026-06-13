@@ -33,6 +33,23 @@ Or, inside a Claude Code session:
 /plugin install agentic-harness@mrbogomips-harness
 ```
 
+## Uninstall
+
+```bash
+# 1. Remove the plugin
+claude plugin uninstall agentic-harness
+
+# 2. Optionally remove the marketplace
+claude plugin marketplace remove mrbogomips-harness
+```
+
+Or, inside a Claude Code session:
+
+```
+/plugin uninstall agentic-harness
+/plugin marketplace remove mrbogomips-harness
+```
+
 ## The skills
 
 - **`harness-setup`** — the writer. Analyzes the project, designs an agent team and the skills they use, generates them into `.claude/`, builds an orchestrator, and registers a pointer in `CLAUDE.md` that makes the orchestrator the repo's entry point — a hard gate routing every prompt through it. Also extends an existing harness, applies a review context, and records every change.

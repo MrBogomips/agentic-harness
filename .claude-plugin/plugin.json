@@ -1,6 +1,6 @@
 {
   "name": "agentic-harness",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Stand up, assess, and maintain an agentic harness in an existing repo. A meta-tool that generates project-specific agent teams and the skills they use, then assesses how effectively they are used. When a spec-driven development system or an issue tracker is present, the generated orchestrator coordinates with it — activating the spec workflow and resuming on hand-back, pulling ready work and writing status back. When a repo-native tracker and a human tracker (Jira, Linear, GitHub Issues) coexist, it generates a dual-tracker sync that keeps the SaaS as a projection of the repo-native source of truth. Five skills: harness-setup (build, extend, maintain), harness-review (read-only assessment), harness-feedback (run a kaizen retrospective and file tool-improvement feedback upstream), spec-advisor (advise and delegate setup of a spec-driven development system), and tracker-advisor (advise and delegate setup of an agent-suited issue tracker).",
   "author": {
     "name": "MrBogomips",

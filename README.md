@@ -4,6 +4,17 @@ A [Claude Code](https://claude.com/claude-code) plugin that stands up, assesses,
 
 This plugin does not do your domain work. It builds and maintains the agents and skills that do.
 
+## Why use it
+
+Instead of restarting from ad-hoc prompts every session, agentic-harness builds and maintains a project-specific team that Claude Code routes through automatically:
+
+- **Tailored, not generic templates** — the agents and skills mirror your repo's stack, domain, and task types, not a one-size-fits-all scaffold.
+- **A single entry point** — the orchestrator is registered in `CLAUDE.md` as a hard gate, so every prompt goes through the right flow instead of bypassing the harness.
+- **Coordinates, doesn't duplicate** — when the project already has a spec-driven system or an issue tracker, the orchestrator coordinates with it (activates the spec and resumes on hand-back, pulls ready work and writes status back) rather than reimplementing it.
+- **No lock-in** — for spec systems and trackers it advises the best fit and delegates installation to that tool's own installer; it never reinvents them.
+- **Maintainable and traceable** — every change to the harness is approved before anything is written and recorded in a change-history, so its evolution stays visible and regressions stay catchable.
+- **A built-in improvement loop** — `harness-feedback` turns each run into structured, privacy-safe feedback so the tool itself gets better over time.
+
 ## Installation
 
 ```bash

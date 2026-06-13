@@ -230,12 +230,39 @@ validate_marketplace() {
     ok "marketplace.json: structure valid ($plugin_count plugin)"
 }
 
+# --- Name-clash validation (a command and a skill must not share a name) ---
+
+validate_name_clashes() {
+    local plugin_dir="$1"
+
+    echo ""
+    echo "=== Checking skill/command name clashes ==="
+
+    if [[ ! -d "$plugin_dir/commands" || ! -d "$plugin_dir/skills" ]]; then
+        ok "no command+skill overlap to check"
+        return
+    fi
+
+    local found=0
+    for cmd_file in "$plugin_dir"/commands/*.md; do
+        [[ -f "$cmd_file" ]] || continue
+        local cmd_name
+        cmd_name="$(basename "$cmd_file" .md)"
+        if [[ -d "$plugin_dir/skills/$cmd_name" ]]; then
+            error "name clash: command '$cmd_name' and skill '$cmd_name' resolve to the same qualified name — the command shadows the skill. Rename one (e.g. the command)."
+            found=1
+        fi
+    done
+    [[ $found -eq 0 ]] && ok "no skill/command name clashes"
+}
+
 # --- Main ---
 
 echo "agentic-harness Plugin Validator"
 echo "============================"
 
 validate_plugin "$REPO_ROOT"
+validate_name_clashes "$REPO_ROOT"
 validate_marketplace
 
 # Summary

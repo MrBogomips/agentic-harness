@@ -29,7 +29,7 @@ triages issues in the user's own tracker — that is the project's tracker, not 
 
 - **Right after a run** — `harness-setup` Step 7 and `harness-review`'s output both *offer* this
   skill. The run's context is still in the conversation, so the draft can be specific.
-- **Standalone, in a kaizen loop** — invoked later (or via the `/harness-feedback` command) as a
+- **Standalone, in a kaizen loop** — invoked later (or via the `/feedback` command) as a
   postmortem. The run's context is gone, so Step 0 reconstructs it.
 
 Either way the flow is the same; only where the facts come from differs.

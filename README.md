@@ -33,7 +33,7 @@ Or, inside a Claude Code session:
 /plugin install agentic-harness@mrbogomips-harness
 ```
 
-## The five skills
+## The skills
 
 - **`harness-setup`** — the writer. Analyzes the project, designs an agent team and the skills they use, generates them into `.claude/`, builds an orchestrator, and registers a pointer in `CLAUDE.md` that makes the orchestrator the repo's entry point — a hard gate routing every prompt through it. Also extends an existing harness, applies a review context, and records every change.
 - **`harness-review`** — read-only. Inventories the harness, detects drift, and assesses how effectively the skills and agents are actually used — reading the repo's **recurring activities and way of working** from project memory, the `CLAUDE.md` pointer and change-history, and the `.claude/` inventory. From that it produces a prioritized *review context* of **periodic improvements and optimizations** that `harness-setup` can act on.

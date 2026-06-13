@@ -64,10 +64,6 @@ Before a release or marketplace submission, also run the same check the review p
 claude plugin validate . --strict
 ```
 
-## Attribution
-
-The harness concept is inspired by the open-source `harness` plugin by [revfactory](https://github.com/revfactory) (Apache-2.0). This plugin is an independent reimplementation under MIT, with its own structure and prose.
-
 ## License
 
 MIT — see [LICENSE](./LICENSE).

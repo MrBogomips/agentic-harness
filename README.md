@@ -25,7 +25,7 @@ Or, inside a Claude Code session:
 
 - **`harness-setup`** — the writer. Analyzes the project, designs an agent team and the skills they use, generates them into `.claude/`, builds an orchestrator, and registers a pointer in `CLAUDE.md` that makes the orchestrator the repo's entry point — a hard gate routing every prompt through it. Also extends an existing harness, applies a review context, and records every change.
 - **`harness-review`** — read-only. Inventories the harness, detects drift, and assesses how effectively the skills and agents are actually used (from project memory, the `CLAUDE.md` pointer, and the `.claude/` inventory), then produces a prioritized *review context* that `harness-setup` can act on.
-- **`harness-feedback`** — closes the loop to the tool. Runs a kaizen retrospective on a harness run, drafts feedback in a standard format, redacts project-identifying details, and — only with explicit consent — files a GitHub issue on this upstream repo so the tool itself improves. Offered at the end of a `harness-setup` or `harness-review` run, or invoked on its own (`/harness-feedback`) in a postmortem loop.
+- **`harness-feedback`** — closes the loop to the tool. Runs a kaizen retrospective on a harness run, drafts feedback in a standard format, redacts project-identifying details, and — only with explicit consent — files a GitHub issue on this upstream repo so the tool itself improves. Offered at the end of a `harness-setup` or `harness-review` run, or invoked on its own (`/feedback`) in a postmortem loop.
 - **`spec-advisor`** — detects whether a software project lacks a spec-driven development system and, if so, advises the best-fit option (GitHub Spec Kit, OpenSpec, BMAD-METHOD, Agent OS, Taskmaster, AWS Kiro, ADR tooling) and delegates setup to that system's own installer. Offline-first; scans first and stays out if a system is already present; never authors specs itself.
 - **`tracker-advisor`** — detects whether a software project lacks an issue tracker suited to agentic work and, if so, advises the best-fit option (Beads, Backlog.md, git-bug, git-issues, Beans, or GitHub Issues / Linear / Jira via their official access paths) and delegates setup to that system's own installer. Same posture as `spec-advisor`: offline-first, scans first and stays out, never authors issues.
 
@@ -60,7 +60,7 @@ Each run is a chance to improve the tool, not just the project. `harness-feedbac
 
 ## Skills, and one command
 
-Invoke a skill directly (`/agentic-harness:harness-setup`) or let Claude trigger it from context — that is how the harness skills are meant to run, since Claude Code merged commands into skills. The one deliberate command this plugin ships is **`/harness-feedback`**: a discoverable entry point for the kaizen feedback loop, which simply runs the `harness-feedback` skill.
+Invoke a skill directly (`/agentic-harness:harness-setup`) or let Claude trigger it from context — that is how the harness skills are meant to run, since Claude Code merged commands into skills. The one deliberate command this plugin ships is **`/feedback`**: a discoverable entry point for the kaizen feedback loop, which simply runs the `harness-feedback` skill. (It is named `/feedback`, not `/harness-feedback`, so it does not collide with the skill of that name.)
 
 ## Development
 

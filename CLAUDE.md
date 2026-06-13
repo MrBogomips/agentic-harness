@@ -7,7 +7,7 @@ Guidance for working in the agentic-harness plugin repository.
 This is a single-plugin repository: the repo root is the plugin. `.claude-plugin/` holds both `plugin.json` (the plugin manifest) and `marketplace.json` (a single-plugin marketplace named `mrbogomips-harness`, whose one entry points at `./`).
 
 - **Skills** — `skills/*/SKILL.md` (harness-setup, harness-review, harness-feedback, spec-advisor, tracker-advisor)
-- **Commands** — `commands/*.md` (`/harness-feedback` — the one deliberate command; everything else is a skill)
+- **Commands** — `commands/*.md` (`/feedback` — the one deliberate command; named to avoid clashing with the `harness-feedback` skill; everything else is a skill)
 - **Shared knowledge** — `shared/*.md`, referenced from skills as `${CLAUDE_PLUGIN_ROOT}/shared/...`
 - **GitHub config** — `.github/ISSUE_TEMPLATE/feedback.md` (the feedback issue template) and `.github/workflows/` (`validate.yml` for plugin structure, `feedback-check.yml` for feedback-issue validation)
 

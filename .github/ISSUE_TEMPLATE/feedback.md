@@ -14,7 +14,7 @@ including "Environment") are MANDATORY — a bot will ask for anything left empt
 
 PRIVACY: this is a PUBLIC repo. Redact project specifics — repo/org names, absolute paths,
 proprietary domain terms, secrets, internal URLs. Keep the generic stack and the harness mechanics.
-The /harness-feedback skill drafts and redacts this for you automatically; you can also fill it by hand.
+The `harness-feedback` skill (the `/feedback` command) drafts and redacts this for you automatically; you can also fill it by hand.
 -->
 
 ## Summary

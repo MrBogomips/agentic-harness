@@ -1,0 +1,7 @@
+# Keep the "open a blank issue" escape hatch, but steer feedback through the template
+# so it arrives in the standard format the CI check can validate.
+blank_issues_enabled: true
+contact_links:
+  - name: Plugin documentation
+    url: https://github.com/MrBogomips/agentic-harness#readme
+    about: How the harness works, the skills it ships, and the feedback loop — read before filing.

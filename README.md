@@ -21,10 +21,11 @@ Or, inside a Claude Code session:
 /plugin install agentic-harness@mrbogomips-harness
 ```
 
-## The four skills
+## The five skills
 
 - **`harness-setup`** — the writer. Analyzes the project, designs an agent team and the skills they use, generates them into `.claude/`, builds an orchestrator, and registers a pointer in `CLAUDE.md` that makes the orchestrator the repo's entry point — a hard gate routing every prompt through it. Also extends an existing harness, applies a review context, and records every change.
 - **`harness-review`** — read-only. Inventories the harness, detects drift, and assesses how effectively the skills and agents are actually used (from project memory, the `CLAUDE.md` pointer, and the `.claude/` inventory), then produces a prioritized *review context* that `harness-setup` can act on.
+- **`harness-feedback`** — closes the loop to the tool. Runs a kaizen retrospective on a harness run, drafts feedback in a standard format, redacts project-identifying details, and — only with explicit consent — files a GitHub issue on this upstream repo so the tool itself improves. Offered at the end of a `harness-setup` or `harness-review` run, or invoked on its own (`/harness-feedback`) in a postmortem loop.
 - **`spec-advisor`** — detects whether a software project lacks a spec-driven development system and, if so, advises the best-fit option (GitHub Spec Kit, OpenSpec, BMAD-METHOD, Agent OS, Taskmaster, AWS Kiro, ADR tooling) and delegates setup to that system's own installer. Offline-first; scans first and stays out if a system is already present; never authors specs itself.
 - **`tracker-advisor`** — detects whether a software project lacks an issue tracker suited to agentic work and, if so, advises the best-fit option (Beads, Backlog.md, git-bug, git-issues, Beans, or GitHub Issues / Linear / Jira via their official access paths) and delegates setup to that system's own installer. Same posture as `spec-advisor`: offline-first, scans first and stays out, never authors issues.
 
@@ -46,9 +47,20 @@ When a project runs **both** a repo-native tracker and a human-oriented one (Jir
 
 `harness-setup` defaults to an **agent team** and falls back to **subagents** when the experimental team tools are unavailable. See [`shared/execution-modes.md`](./shared/execution-modes.md).
 
-## Skills, not commands
+## Feedback loop (kaizen)
 
-Invoke a skill directly (`/agentic-harness:harness-setup`) or let Claude trigger it from context. This plugin ships no slash commands — Claude Code merged commands into skills.
+Each run is a chance to improve the tool, not just the project. `harness-feedback` turns a run into structured, privacy-safe feedback and files it as a GitHub issue here on the upstream repo:
+
+- **One standard format** — defined once in [`shared/feedback-format.md`](./shared/feedback-format.md): eight mandatory sections (Summary, Type, What was done, Choices made, Expected outcome, What happened / friction, Suggested improvement, Environment) plus optional context. The [issue template](./.github/ISSUE_TEMPLATE/feedback.md) and the CI check both mirror this one file.
+- **Redaction by default** — the harness runs in a private project but feedback lands on a public repo, so project-identifying details (repo/org names, paths, proprietary terms, secrets) are stripped before anything is shown for approval.
+- **Explicit consent** — the exact issue body is shown and approved before `gh issue create` (with a prefilled-URL fallback when `gh` isn't available). Nothing is filed silently.
+- **Automatic validation** — a GitHub Actions check ([`feedback-check.yml`](./.github/workflows/feedback-check.yml)) verifies every feedback issue carries the mandatory sections and auto-comments a checklist (labelling `needs-info`) when something is missing, clearing it once the issue is complete.
+
+`tests/validate-feedback.sh` keeps the format doc, the issue template, and the CI check in sync.
+
+## Skills, and one command
+
+Invoke a skill directly (`/agentic-harness:harness-setup`) or let Claude trigger it from context — that is how the harness skills are meant to run, since Claude Code merged commands into skills. The one deliberate command this plugin ships is **`/harness-feedback`**: a discoverable entry point for the kaizen feedback loop, which simply runs the `harness-feedback` skill.
 
 ## Development
 

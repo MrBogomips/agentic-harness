@@ -26,6 +26,7 @@ change needs (step numbers are from the `harness-setup` SKILL.md):
 | Add an agent | reuse Step 0 | placement only | yes | only if it needs a new skill | update composition + triggers | yes |
 | Add / change a skill | skip | skip | skip | yes | only if wiring changes | yes |
 | Architecture change | skip | yes | only affected agents | only affected skills | yes | yes |
+| Registry schema upgrade (`tools.md` without `Kind`/`Source`) | skip | skip | skip | generate `{domain}-setup-check` if absent | skip | yes |
 
 When adding an agent, modify the existing orchestrator — do not spawn a second one. Reflect
 the new agent in the team composition, task assignment, data flow, and trigger keywords.
@@ -119,12 +120,17 @@ signals:
 - A tool has stopped being maintained, or a better alternative has appeared.
 - The preferred tool fails often enough that agents are running on its alternative in
   practice.
+- `harness-doctor` reports it missing, disabled, stale, or broken-link on the machines the harness
+  runs on — run it first; its report is the health signal for every row.
+- A visual profile in `visual-advisor`'s catalog is past its `verify_by` date — offer the
+  refresh before keeping the tool.
 
 The split follows the rest of this plugin: assessing whether a tool is still earning its
 place is a read activity, so it belongs to `harness-review` (it reads the registry as one of
 its usage signals); swapping, adding, or retiring a tool is a write, so it comes back here —
 and a retirement is an uninstall row in the Step 2b manifest, approved before it is carried
-out. When you change the registry, update the affected row's `Last reviewed` date, keep every
+out. When you change the registry, update the affected row's `Last reviewed` date, fill in
+`Kind` and a pinned `Source` if they are missing, keep every
 role's alternative current, and record the change in the `CLAUDE.md` history like any other.
 Because agents and skills reference tools by role, swapping the tool behind a role needs no
 edits to their files.

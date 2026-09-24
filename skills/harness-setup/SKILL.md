@@ -1,6 +1,6 @@
 ---
 name: harness-setup
-description: "Build, extend, and maintain a project's agentic harness — the agents, skills, and orchestrator under .claude/. This skill writes files. Use it to set up, scaffold, extend, rebuild, or sync a harness, to add or change an agent or skill, or to apply a review context from harness-review; on request it also discovers and registers fitting MCP/plugin tools. When a project runs both a repo-native tracker and a human tracker (Jira, Linear, GitHub Issues), it also generates the dual-tracker sync — use it for 'keep the trackers in sync', 'sync issues to Jira/Linear', or 'tracker sync setup'. For read-only assessment of an existing harness, use harness-review — this skill is the writer, that one is the reader. Not for authoring a single standalone skill or plugin (use plugin-dev or skill-creator), or one-shot automation recommendations (use claude-code-setup). Not for choosing a project's spec-driven development system or issue tracker — use spec-advisor or tracker-advisor."
+description: "Build, extend, and maintain a project's agentic harness — the agents, skills, and orchestrator under .claude/. This skill writes files. Use it to set up, scaffold, extend, rebuild, or sync a harness, to add or change an agent or skill, or to apply a review context from harness-review; on request it also discovers and registers fitting MCP/plugin tools, offers a visual stack chosen with visual-advisor, and generates a setup-check skill backed by harness-doctor. When a project runs both a repo-native tracker and a human tracker (Jira, Linear, GitHub Issues), it also generates the dual-tracker sync — use it for 'keep the trackers in sync', 'sync issues to Jira/Linear', or 'tracker sync setup'. For read-only assessment of an existing harness, use harness-review — this skill is the writer, that one is the reader. Not for authoring a single standalone skill or plugin (use plugin-dev or skill-creator), or one-shot automation recommendations (use claude-code-setup). Not for choosing a project's spec-driven development system or issue tracker — use spec-advisor or tracker-advisor. Not for checking what is installed on the machine — use harness-doctor."
 model: inherit
 ---
 
@@ -43,6 +43,8 @@ plan is confirmed.
    part of a good harness, so make them part of the plan you present **every run** — don't
    wait to be asked:
    - **Always ask whether to run tool discovery** (Step 1b), on a new build or an extension.
+     The question includes the **visuals sub-step** — one line on what a visual stack would do
+     for this domain; the full briefing runs only if the user wants it.
    - **On an existing harness** (extend / apply-review-context / sync), **also ask whether to
      run a tool-maintenance review** of the registered `tools.md` (see
      `references/maintenance.md`).
@@ -125,8 +127,21 @@ built-in catalog:
    Agents and skills reference a tool by its **role**, never by a hard tool name, so the
    harness falls back to the alternative when a tool is missing.
 
-The subagent's context template, the acceptance flow, and the registry schema are in
-`references/tool-discovery.md`. Registered tools are reviewed periodically — see
+4. **Curated role: visuals.** As part of the same run, invoke `visual-advisor` with the Step 1
+   domain profile. It briefs the user on where visuals would and would not help this domain,
+   invites their own visual patterns and tools, and returns a **visual stack context** (review
+   surface, generators, style source, patterns, environment, cost and share policies). Its tools
+   join the candidate list under the roles `visual-review-surface` and `visual-generator`; the
+   context drives the `{domain}-visuals` skill in Step 4. A "no" skips it — and Step 4 then
+   generates no visuals skill. Visuals are the one role with a curated catalog; the reason is in
+   `references/tool-discovery.md`.
+
+Before the search, inventory what is already installed with plain read-only listings
+(`claude plugin list`, the MCP server names in `claude mcp list` or `/mcp`, the skill
+directories). After the search, pass the candidate list — plus any existing `tools.md` rows — to
+`harness-doctor`, so each candidate arrives with a verified status and missing ones as pinned
+install rows. The subagent's context
+template, the acceptance flow, and the registry schema are in `references/tool-discovery.md`. Registered tools are reviewed periodically — see
 `references/maintenance.md`.
 
 ## Step 2: Choose the execution mode and the architecture pattern
@@ -187,7 +202,7 @@ Present it as concrete items, each labelled with its action and target:
 | create / update / remove | `.claude/skills/{name}/` (one row per skill) |
 | create / update | `.claude/skills/{domain}-orchestrator/` |
 | update | `CLAUDE.md` (harness pointer + change-history row) |
-| install / uninstall | `{role} -> {tool}` (only if tool discovery or maintenance proposed it) |
+| install / uninstall | `{role} -> {tool}` (only if tool discovery, visual-advisor, harness-doctor, or maintenance proposed it; one command per approval, pinned, per the install safety contract in `harness-doctor`) |
 | register / unregister schedule | `{venue} — {cadence} — {mode}` (one row per scheduled run; **environment-level** — approving it changes the user's machine, not just the repo) |
 
 List only the rows that apply. If the user amends the list — drops an agent, declines a tool,
@@ -239,6 +254,20 @@ description writing, body principles, progressive disclosure, data-schema standa
 - **Linking.** One agent uses one or more skills; a skill may be shared across agents. The
   skill holds *how*; the agent holds *who*.
 
+Two skills are generated from templates rather than designed per project:
+
+- **`{domain}-visuals`** — only when the visuals sub-step returned a stack. Fill
+  `references/visual-skill-template.md` from the visual stack context. It records the project's
+  **choices** — stack, patterns, the user's own patterns verbatim, style priority, output
+  paths, the review-loop shape, the share-consent and cost-approval rules — and **defers to each
+  tool's own skill or `--help` for how to operate it**. Never copy a tool's commands or flags
+  into it: tool instructions drift faster than the harness is reviewed.
+- **`{domain}-setup-check`** — whenever `tools.md` has at least one row. Fill
+  `references/setup-check-template.md`. It is **self-contained**: it reads `tools.md` and runs
+  inline presence checks, and hands off to the plugin's `harness-doctor` for the full check when
+  the agentic-harness plugin is installed. A teammate without the plugin still gets a working
+  check and an optional install hint.
+
 ## Step 5: Build the orchestrator and register the pointer
 
 The orchestrator is a skill whose subject is the team: which agents take part, what each
@@ -267,6 +296,10 @@ Build into the orchestrator:
 - **The tools registry**, when tool discovery (Step 1b) has run: it lives in this
   orchestrator's `references/` directory as `tools.md`, and agents and skills reference tools
   by role from it.
+- **Routing to the template skills**, when they were generated: intake routes "show me / draw /
+  mock up / visualise" requests and any phase whose output a person must review visually to
+  `{domain}-visuals`; it routes "check my setup / why is tool X unavailable / onboard this
+  machine" to `{domain}-setup-check`. Add both phrasings to the orchestrator's trigger keywords.
 - **SDD coordination**, when Step 0 recorded an SDD coordination context: splice the addenda from
   `references/orchestrator-template.md` (SDD coordination section) into the orchestrator's phase 0,
   prepare, and integrate phases, **inlining the system's concrete artifact paths and entry point** —
@@ -365,6 +398,10 @@ Before calling a setup or change complete:
       maintenance), and the answer was recorded — whatever they chose.
 - [ ] If tool discovery ran: nothing was adopted without explicit approval, and accepted
       tools are registered by role (with alternatives) in the orchestrator's `tools.md`.
+- [ ] Every install row was pinned and approved one command at a time, with provenance shown.
+- [ ] If the visuals sub-step returned a stack: `{domain}-visuals` exists, embeds the user's
+      patterns verbatim, and contains no copied tool commands or flags.
+- [ ] If `tools.md` has rows: `{domain}-setup-check` exists and works without the plugin.
 
 ## References
 
@@ -380,6 +417,11 @@ Before calling a setup or change complete:
   applying a review context, syncing drift, feedback routing, and periodic tool review.
 - `references/tool-discovery.md` — the optional, on-request tool-discovery step: the
   search subagent's context, the explicit-acceptance flow, and the `tools.md` registry schema.
+- `references/visual-skill-template.md` — the generated `{domain}-visuals` skill.
+- `references/setup-check-template.md` — the generated, self-contained `{domain}-setup-check`
+  skill.
+- `visual-advisor` and `harness-doctor` (sibling skills) — the visual stack choice and the
+  read-only system check with the install safety contract.
 - `references/tracker-sync-template.md` — what the dual-tracker sync sub-step generates: the
   `tracker-sync` skill, agent, and sync-config templates, the elicitation guidance, and the
   schedule-registration block per venue.

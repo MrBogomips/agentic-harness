@@ -1,0 +1,1 @@
+{"mcpServers":{"project-mcp":{"command":"npx","args":["project-mcp"],"env":{"PASS":"SECRET_VALUE_DO_NOT_PRINT"}}}}

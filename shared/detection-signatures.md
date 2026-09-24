@@ -1,7 +1,7 @@
 # Detection signatures
 
 The scan-first knowledge behind flow Step 1 of `spec-advisor` and `tracker-advisor` (and behind
-`harness-setup`'s process-layers gate). This is a curated **reference of facts**, not a set of
+`harness-setup`'s process-layers gate), and behind `visual-advisor`'s Step 1 scan. This is a curated **reference of facts**, not a set of
 recommendations: it tells you how to recognise a spec system, an ADR registry, or an issue
 tracker that is already present, so the skill can report it and stay out. A generic search
 cannot reliably re-derive these signatures each run — the on-disk layouts drift in load-bearing
@@ -68,6 +68,25 @@ conclude silently**:
 
 A declared tracker counts too: when the user says the team works in Jira or Linear, that is
 presence — record it and confirm the access path, do not demand an on-disk artifact.
+
+## Visual tooling — path → signal table
+
+These feed `visual-advisor`'s Step 1 scan. Unlike the tables above, a hit does **not** stop the
+advisor: visuals are a tool role, so what is present becomes the **incumbent** in the comparison
+and is reused rather than replaced. Machine-level presence (installed plugins, skills, MCP
+servers, CLIs) is not scanned here — ask `harness-doctor`.
+
+| Signature path(s) | Signal | Notes |
+|---|---|---|
+| `.lavish/` | lavish in use | Holds the HTML pages lavish reviews; the review surface is already chosen. |
+| `*.puml`, `*.plantuml`, `*.iuml` | PlantUML diagrams | Diagrams-as-code are versioned in the repo; keep that medium. |
+| `*.mmd`, fenced `mermaid` blocks in docs | Mermaid diagrams | Diagram source already in text form. |
+| `*.excalidraw`, `*.canvas` | Whiteboard / canvas files | Freehand or canvas diagrams already in use. |
+| `DESIGN.md`, `design-tokens.json`, `tokens.json`, `*.tokens.json` | Design system | The style source — the project's design system outranks any tool default. |
+| `tailwind.config.*`, a `@theme` block in CSS | Tailwind theme | Also a style source. |
+| `brand/`, `assets/brand/`, `logo*.svg` | Brand assets | Generated assets must match them. |
+| `docs/assets/`, `docs/images/`, `docs/diagrams/` | Static visual output | The project already reviews visuals as files. |
+| `figma.com/file/` or `figma.com/design/` links in docs | Figma as design source | Design source of truth lives in Figma. |
 
 ## Disambiguation rules
 

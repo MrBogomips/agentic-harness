@@ -17,6 +17,12 @@ This is a single-plugin repository: the repo root is the plugin. `.claude-plugin
 
 The flow uses two repo labels: `feedback` (marks issues to validate) and `needs-info` (set when an issue is incomplete). The CI bot identifies a feedback issue by the `feedback` label **or** a `[feedback]` title prefix, ensures both labels exist, and applies `feedback` itself — so reporters who cannot set labels (non-collaborators opening via the CLI) are still handled, and a fresh fork self-heals on first use.
 
+### Adding a skill
+
+A new skill must be listed in: `plugin.json` description (skill count + one-liner), `marketplace.json` entry description, README "The skills" + "How they fit together", the CLAUDE.md skills list above, the "What this skill is not" tables of the sibling advisors, and the `harness-setup` frontmatter boundaries. No test enforces these.
+
+`validate-references.sh` treats any `references/<file>` in a SKILL.md as a path relative to that skill. Describe target-project paths (e.g. a harness's `tools.md`) in prose, not as `references/...`.
+
 ## Versioning
 
 `plugin.json` is the source of truth for the plugin version. The `marketplace.json` entry must carry the same version — `tests/validate-versions.sh` enforces the sync. Bump both together.
@@ -40,6 +46,8 @@ claude plugin validate . --strict
 ## Shell script conventions
 
 Scripts must be macOS (BSD) compatible — no `grep -P`, no `head -n -1`, no associative arrays (bash 3.2). Use `grep -E`/`grep -oE` and `awk` instead. Avoid `((VAR++))` with `set -e` (fails when VAR=0); use `VAR=$((VAR + 1))`.
+
+`IFS=$'\t' read` collapses consecutive tabs (tab is IFS whitespace), so empty fields shift — split on `$'\x1f'` instead. To test an *environment* variable use `printenv VAR >/dev/null`; `${!VAR}` also sees the script's own shell variables.
 
 ## Git / PR Working Policy
 - Worktree usage: disabled

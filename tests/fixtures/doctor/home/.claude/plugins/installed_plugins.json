@@ -1,0 +1,9 @@
+{"version":2,"plugins":{
+ "good-plugin@mkt":[{"scope":"user","installPath":"__HOME__/.claude/plugins/cache/mkt/good-plugin/1.0.0","version":"1.0.0"}],
+ "disabled-plugin@mkt":[{"scope":"user","installPath":"__HOME__/.claude/plugins/cache/mkt/disabled-plugin/1.0.0","version":"1.0.0"}],
+ "proj-plugin@mkt":[{"scope":"project","projectPath":"/somewhere/else","installPath":"__HOME__/.claude/plugins/cache/mkt/proj-plugin/1.0.0","version":"1.0.0"}],
+ "here-plugin@mkt":[{"scope":"local","projectPath":"__PROJECT__","installPath":"__HOME__/.claude/plugins/cache/mkt/here-plugin/1.0.0","version":"1.0.0"}],
+ "stale-plugin@mkt":[{"scope":"user","installPath":"__HOME__/.claude/plugins/cache/mkt/stale-plugin/9.9.9","version":"9.9.9"}],
+ "provider-plugin@mkt":[{"scope":"user","installPath":"__HOME__/.claude/plugins/cache/mkt/provider-plugin/2.0.0","version":"2.0.0"}],
+ "bare-plugin@mkt":[{"installPath":"__HOME__/.claude/plugins/cache/mkt/bare-plugin"}]
+}}

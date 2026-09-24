@@ -25,6 +25,8 @@ This skill does **not**:
 |---|---|
 | Author, triage, or groom issues | the **installed tracker** — it owns its workflow |
 | Choose a spec system, or spec-derived task decomposition (Taskmaster) | **spec-advisor** |
+| Choose visual tooling (review surface, image or diagram generators) | **visual-advisor** |
+| Check which plugins, skills, or MCP servers are installed | **harness-doctor** |
 | Build the `.claude/` agent harness (agents, skills, orchestrator) | **harness-setup** |
 | Assess how well a harness is used | **harness-review** |
 | Create Claude Code components (skills, agents, plugins) | **plugin-dev / skill-creator** |

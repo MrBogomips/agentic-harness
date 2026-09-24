@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Fake `claude` CLI for validate-doctor.sh: answers only `plugin list --json`.
+# Any other invocation is logged to $DOCTOR_SHIM_LOG (when set) so the test can
+# prove the detector never calls a mutating or unexpected subcommand.
+if [ "$#" -eq 3 ] && [ "$1" = plugin ] && [ "$2" = list ] && [ "$3" = --json ]; then
+    cat "$(cd "$(dirname "$0")" && pwd)/plugin-list.json"
+    exit 0
+fi
+[ -n "${DOCTOR_SHIM_LOG:-}" ] && printf 'unexpected: claude %s\n' "$*" >> "$DOCTOR_SHIM_LOG"
+echo "fake claude: unsupported args: $*" >&2
+exit 1

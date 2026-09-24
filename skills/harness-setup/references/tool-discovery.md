@@ -13,6 +13,13 @@ existing harness. Offering is automatic; running is not — and no individual to
 without a separate explicit yes. This skill ships **no catalog of recommendations** — every
 candidate comes from a live search and the local configuration.
 
+**The one exception is visuals.** `visual-advisor` keeps a small curated catalog for the
+`visual-review-surface` and `visual-generator` roles. Visual tools differ in ways a generic
+search does not surface reliably but that decide fit — whether a browser loop can run here,
+whether prompts leave the machine, what each generation costs — and the user asked to compare
+them with domain-specific pros and cons. The catalog is dated and refreshed online on request;
+every other role stays search-driven.
+
 ## Step 1: Brief the search subagent
 
 Dispatch a search-optimized subagent and give it a tight context so its search is grounded in
@@ -41,7 +48,13 @@ search and the project context turn up.
 ## Step 2: Check the local configuration
 
 Before proposing anything, inspect what is already available in the local and session
-configuration — connected MCP servers, installed plugins, CLIs on the path. The point is
+configuration — connected MCP servers, installed plugins, skills, CLIs on the path — with plain
+read-only listings (`claude plugin list`, MCP server names from `claude mcp list` or `/mcp`, the
+skill directories). Then, once the search has returned, pass the candidate list to
+`harness-doctor` with harness-setup as the caller: it checks each named candidate
+deterministically, respects scope and enablement, reports stale installs, and drafts pinned
+install rows for what is missing. The doctor checks named tools; it does not inventory the
+machine, which is why the listings come first. The point is
 twofold: don't propose a tool the project already has, and surface useful tools already
 present that the harness isn't using yet. Fold both into the candidate list.
 
@@ -54,7 +67,9 @@ external tool is a dependency and a trust decision, and that decision is the use
 
 For an accepted tool that needs configuration (an MCP server, a plugin), set it up only as
 far as the user authorizes, and note any credentials or installation the user must complete
-themselves.
+themselves. Every install follows the **install safety contract** in `harness-doctor`: one
+command per approval, provenance shown first, a pinned source, blocklisted plugins refused, MCP
+`command`/`args` shown in full, project scope by default.
 
 ## Step 4: Register accepted tools
 
@@ -72,12 +87,19 @@ orchestrator owns it. The schema:
 Agents and skills reference a tool by its **role**, never by a hard tool name. When the
 preferred tool is unavailable, fall back to the alternative. Reviewed on the dates below.
 
-| Role | Preferred tool | Alternative (if unavailable) | Status | Last reviewed |
-|------|----------------|------------------------------|--------|---------------|
-| knowledge-base | {accepted MCP} | built-in file search | active | {YYYY-MM-DD} |
-| language-server | {accepted tool} | manual code reading | active | {YYYY-MM-DD} |
-| issue-tracker | {accepted CLI} | none — note the gap | active | {YYYY-MM-DD} |
+| Role | Preferred tool | Alternative (if unavailable) | Status | Last reviewed | Kind | Source |
+|------|----------------|------------------------------|--------|---------------|------|--------|
+| knowledge-base | {accepted MCP} | built-in file search | active | {YYYY-MM-DD} | mcp | {pinned command} |
+| language-server | {accepted tool} | manual code reading | active | {YYYY-MM-DD} | plugin | {name@marketplace} |
+| issue-tracker | {accepted CLI} | none — note the gap | active | {YYYY-MM-DD} | cli | {package@version} |
+| visual-review-surface | {from visual-advisor} | static files | active | {YYYY-MM-DD} | skill+cli | {pinned source} |
 ```
+
+`Kind` (`plugin`, `skill`, `mcp`, `cli`, `env`, `remote`, or a `+`-joined combination) and
+`Source` (the pinned install command or plugin id) are what `harness-doctor` and the generated
+`{domain}-setup-check` read to check and repair the machine. Both columns are **optional**: a
+registry written before they existed stays valid, and they are filled in on the next Extend,
+Sync, or periodic tool review.
 
 Every role needs an **alternative**, even if the alternative is "none, and here is what the
 agent does without it." The alternative is what keeps the harness working when a tool is

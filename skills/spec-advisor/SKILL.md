@@ -25,6 +25,8 @@ This skill does **not**:
 |---|---|
 | Author specs, PRDs, or ADRs | the **installed system** — it owns its workflow |
 | Choose or set up an issue tracker | **tracker-advisor** |
+| Choose visual tooling (review surface, image or diagram generators) | **visual-advisor** |
+| Check which plugins, skills, or MCP servers are installed | **harness-doctor** |
 | Build the `.claude/` agent harness (agents, skills, orchestrator) | **harness-setup** |
 | Assess how well a harness is used | **harness-review** |
 | Create Claude Code components (skills, agents, plugins) | **plugin-dev / skill-creator** |

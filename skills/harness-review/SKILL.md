@@ -91,6 +91,9 @@ fixed, deterministic signal set — read each, infer nothing you cannot ground i
 - **The `.claude/` inventory** — what the harness offers.
 - **The tools registry**, if present (a `tools.md` in the orchestrator's `references/`
   directory) — which roles are filled by which tools, and their alternatives.
+- **The machine's health for that registry** — run `harness-doctor` (itself read-only) against
+  `tools.md`. A role whose preferred tool is missing, disabled, or stale here is running on its
+  alternative in practice, which is a usage finding in its own right.
 
 From these, classify each skill and agent as **used**, **unused**, **bypassed** (the work
 happens but around the harness), or **drifted** (present but out of sync). When the orchestrator
@@ -120,6 +123,11 @@ making the call is in `references/usage-assessment.md`. This step is strictly re
   fallback executable? Check the declared execution mode against
   `${CLAUDE_PLUGIN_ROOT}/shared/execution-modes.md` — in particular, that a team-mode
   harness has the subagent fallback it needs.
+- **Template skills, if present.** A generated `{domain}-visuals` skill must record choices
+  only: flag any copied tool command or flag (for example a `--option`), since it will drift
+  from the tool's own release. If `tools.md` has rows but there is no `{domain}-setup-check`
+  skill, recommend generating one. A registry row with an empty `Source` (or no `Kind`/`Source`
+  columns at all) is a **low**-priority finding — the registry predates the schema, not drift.
 - **QA agent, if present.** Check it against the QA methodology — does it compare across
   boundaries rather than only confirm existence, and run incrementally rather than once at
   the end? See `references/qa-agent-guide.md`.

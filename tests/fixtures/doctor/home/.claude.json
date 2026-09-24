@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "user-mcp": {"command": "npx", "args": ["user-mcp"], "env": {"TOKEN": "SECRET_VALUE_DO_NOT_PRINT"}}
+  },
+  "projects": {
+    "__PROJECT__": {"mcpServers": {"local-mcp": {"type": "http", "url": "https://example.invalid", "headers": {"Authorization": "Bearer SECRET_VALUE_DO_NOT_PRINT"}}}},
+    "/somewhere/else": {"mcpServers": {"other-project-mcp": {"command": "x"}}}
+  }
+}

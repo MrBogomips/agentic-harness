@@ -23,6 +23,7 @@ fresh laptop, a CI runner — find out whether their machine has what the harnes
 name: {DOMAIN}-setup-check
 description: "Check whether this machine has the tools the {DOMAIN_LABEL} harness needs — the plugins, skills, MCP servers, CLIs, and API-key variables in its tools registry — and explain how to add what is missing. Use on 'check my setup', 'is my environment ready', 'onboard this machine', 'why is tool X unavailable', after cloning the project, or when a harness skill reports a missing tool. Read-only: it installs nothing without approval."
 model: inherit
+effort: low
 ---
 
 # {DOMAIN_LABEL} setup check

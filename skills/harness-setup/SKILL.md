@@ -217,16 +217,23 @@ call; put the role, principles, and protocol in the file. The reason is in the h
 model: a role defined only inline is not reusable next session and carries no collaboration
 contract.
 
-Each agent file states: core role, working principles, input/output protocol, error
-handling, and collaboration. In team mode, add a **team communication protocol** section —
-who it messages, who messages it, and what it claims from the shared task list. The
+Each agent file carries what the model cannot infer on its own: the role's purpose and
+quality bar, its responsibilities, its contract (input, output, and a checkable "done when"),
+and the real constraints with their reasons. It carries no step-by-step procedure (that
+belongs in a skill, preloaded through `skills:` when the agent always needs it) and no
+per-agent error section (failure policy lives once, in the orchestrator). In team mode, add a
+**team communication** section: who it messages, who messages it, and what it claims from
+the shared task list. The
 definition template and worked agent files are in `references/agent-design-patterns.md` and
 `references/team-examples.md`.
 
-**Model.** Default each agent to `model: inherit` so it follows the session's model. A
-harness's quality tracks its agents' reasoning, so for a role that depends on judgment rather
-than throughput, pin the strongest reasoning model explicitly — by its current dated id (e.g.
-`claude-opus-4-8`), not a bare `opus` alias that ages.
+**Model and effort.** Default each agent to `model: inherit` so it follows the session's
+model. Tune the role with `effort` (`low` … `max`) rather than by switching models: effort is
+what trades thinking depth against latency and cost on current models. Judgment roles —
+review, design, QA, integration — take `high` or `xhigh`; reading, collection, and formatting
+roles take `low` or `medium`. Set `model` to an alias (`opus`, `sonnet`, `haiku`) only when a
+role must run on a different model than the session. Aliases track the recommended version,
+while a full model id pins one release and ages with it.
 
 **If the team includes a QA agent.** Use the `general-purpose` type (`Explore` is read-only
 and cannot run validation). Make its core method *cross-boundary comparison* — read both
@@ -369,7 +376,7 @@ Before calling a setup or change complete:
 - [ ] One orchestrator, with data flow, error handling, and test scenarios.
 - [ ] Execution mode is stated (team / subagent / hybrid; per-phase if hybrid), with the
       subagent fallback covered when team mode is the default.
-- [ ] Each agent's model is set deliberately (`inherit` by default; a pinned dated model id only where judgment needs it).
+- [ ] Each agent sets `effort` for its role, and `model` is `inherit` unless the role needs a different model (then an alias, not a pinned id).
 - [ ] No `commands/` directory was generated.
 - [ ] No conflict with existing agents or skills.
 - [ ] Skill and orchestrator descriptions are pushy and include follow-up keywords.

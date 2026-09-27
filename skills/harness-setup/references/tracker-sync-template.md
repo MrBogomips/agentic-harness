@@ -186,6 +186,7 @@ nothing. Spawn it with the `general-purpose` type.
 name: tracker-sync-agent
 description: Executes tracker-sync runs ({LOCAL_TRACKER} ⇄ {SAAS}) — scoped, full, or read-only report mode — for the tracker-sync skill.
 model: inherit
+effort: medium
 ---
 
 # Tracker-sync agent

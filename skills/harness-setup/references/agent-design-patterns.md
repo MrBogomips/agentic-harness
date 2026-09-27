@@ -25,9 +25,10 @@ doc — read that before designing the team. The short version:
   shared task list (`TaskCreate`). Use it when agents need to exchange information while they
   work: sharing findings, challenging each other, reconciling conflicts. Only one team is
   active per session, but a team can be disbanded between phases and a new one formed. The
-  team tools are experimental — always design a subagent fallback.
-- **Subagent** — the orchestrator spawns each agent with the `Agent` tool; the agent returns
-  its result and does not talk to siblings. Use it for a single agent, or for independent
+  team tools are experimental and off unless `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, so
+  always design a subagent fallback.
+- **Subagent** (the default) — the orchestrator spawns each agent with the `Agent` tool; the
+  agent returns its result and does not talk to siblings. Use it for a single agent, or for independent
   jobs where only the combined result matters. Parallelize with `run_in_background`.
 
 Each pattern below notes whether a team earns its cost or a subagent is the better fit.
@@ -59,7 +60,7 @@ Independent work in parallel, then integration.
 Fits when one input needs several independent perspectives. The integration stage governs
 final quality. This is the most natural fit for a team: members surface findings to each
 other and one member's discovery can redirect another's work mid-flight, which a set of
-isolated subagents cannot do. Build it as a team when the tools allow.
+isolated subagents cannot do. Build it as a team when the tools are enabled.
 
 ### Expert Pool
 
@@ -123,8 +124,8 @@ Real harnesses usually combine patterns:
 | Pipeline + Fan-out | parallelize one stage of a sequence | sequential analysis → parallel build → sequential integration test |
 | Supervisor + Expert Pool | supervisor routes to the right specialist on demand | inbound triage that assigns each case to a domain specialist |
 
-Default composites to a team when members benefit from talking; drop to subagents only for a
-stage that is genuinely isolated and one-off.
+Use a team for the stages whose members benefit from talking (when the tools are enabled), and
+subagents for stages that are isolated.
 
 ## 4. Agent type selection
 

@@ -146,9 +146,9 @@ template, the acceptance flow, and the registry schema are in `references/tool-d
 
 ## Step 2: Choose the execution mode and the architecture pattern
 
-**Execution mode.** Default to an **agent team** when two or more agents genuinely need to
-exchange information mid-task; fall back to **subagents** when they do not, or when the
-experimental team tools are unavailable. The team-tools caveat and the mechanical fallback
+**Execution mode.** Default to **subagents**. Choose an **agent team** when two or more agents
+genuinely need to exchange information mid-task *and* the experimental team tools are enabled
+(`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`). Keep a subagent fallback for when they are not. The team-tools caveat and the mechanical fallback
 mapping are in `${CLAUDE_PLUGIN_ROOT}/shared/execution-modes.md` — read it and decide the
 mode before designing the team, because the mode shapes the agent definitions and the
 orchestrator.
@@ -278,9 +278,10 @@ Two skills are generated from templates rather than designed per project:
 ## Step 5: Build the orchestrator and register the pointer
 
 The orchestrator is a skill whose subject is the team: which agents take part, what each
-produces, how outputs flow, and how failures are handled. Templates for team, subagent, and
-hybrid modes — with data-passing, error handling, and test scenarios — are in
-`references/orchestrator-template.md`.
+produces, how outputs flow, and how failures are handled. The single contract-first template,
+plus the mechanics block to inline for the chosen mode (subagent, team, or hybrid), is in
+`references/orchestrator-template.md`. Specify each phase's owner, inputs, outputs, and
+"done when". Leave the steps inside a phase to the model.
 
 Build into the orchestrator:
 
@@ -373,9 +374,10 @@ Before calling a setup or change complete:
       update / remove / install / uninstall) was formally approved before any write.
 - [ ] Every agent is a file under `.claude/agents/` — including built-in types.
 - [ ] Skills exist under `.claude/skills/` with valid `name` + `description` frontmatter.
-- [ ] One orchestrator, with data flow, error handling, and test scenarios.
-- [ ] Execution mode is stated (team / subagent / hybrid; per-phase if hybrid), with the
-      subagent fallback covered when team mode is the default.
+- [ ] One orchestrator, built from the single template: each phase has an owner, inputs,
+      outputs, and a "done when"; plus a failure policy and test scenarios.
+- [ ] Execution mode is stated (team / subagent / hybrid; per-phase if hybrid) with exactly the
+      matching mechanics inlined, and the subagent fallback covered whenever a team is used.
 - [ ] Each agent sets `effort` for its role, and `model` is `inherit` unless the role needs a different model (then an alias, not a pinned id).
 - [ ] No `commands/` directory was generated.
 - [ ] No conflict with existing agents or skills.

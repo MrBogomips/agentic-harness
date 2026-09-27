@@ -7,9 +7,9 @@ the orchestrator.
 ## Before you choose: the team-tools caveat
 
 The agent-team mode depends on experimental tools: `TeamCreate`, `SendMessage`,
-`TaskCreate`/`TaskUpdate`, `TeamDelete`. These are **not guaranteed to be available** in a
-given Claude Code build, session, or permission setup. Treat their presence as a runtime
-fact to check, not an assumption.
+`TaskCreate`/`TaskUpdate`, `TeamDelete`. They are off unless the environment sets
+`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, and even then a given build, session, or permission
+setup may not expose them. Treat their presence as a runtime fact to check, not an assumption.
 
 Because of that, every team-mode harness must define a **subagent fallback**. The subagent
 mode uses only the `Agent` tool, which is broadly available. A harness that can only run as
@@ -24,14 +24,14 @@ unavailable. The mapping below makes that re-route mechanical.
 
 | Mode | Use when | Mechanism |
 |------|----------|-----------|
-| **Agent team** (default) | Two or more agents collaborate and benefit from real-time exchange — sharing findings, challenging each other, reconciling conflicts | Members run as peers; coordinate via `TeamCreate` + `SendMessage` + a shared task list (`TaskCreate`/`TaskUpdate`) |
-| **Subagent** (fallback and lightweight default) | A single agent's work, or several independent jobs where only the result matters and inter-agent talk would be overhead | The orchestrator calls the `Agent` tool directly; parallelize with `run_in_background` and collect return values |
+| **Agent team** | Two or more agents collaborate and benefit from real-time exchange — sharing findings, challenging each other, reconciling conflicts | Members run as peers; coordinate via `TeamCreate` + `SendMessage` + a shared task list (`TaskCreate`/`TaskUpdate`) |
+| **Subagent** (default) | A single agent's work, or several independent jobs where only the result matters and inter-agent talk would be overhead | The orchestrator calls the `Agent` tool directly; parallelize with `run_in_background` and collect return values |
 | **Hybrid** | Phases differ in character — e.g. independent collection, then consensus integration | Choose the mode per phase; state each phase's mode in the orchestrator |
 
-The team mode is the *preferred* default when agents genuinely need to talk: cross-checking
-and shared discovery raise quality in a way isolated subagents cannot. But "preferred" is
-conditional on the tools being present and on the work actually needing coordination. When
-either is false, subagents are the right call, not a downgrade.
+Subagent mode is the default: it needs only the `Agent` tool, which is always there. Choose
+the team mode when agents genuinely need to talk *and* the team tools are enabled.
+Cross-checking and shared discovery then raise quality in a way isolated subagents cannot.
+When either condition is false, subagents are the right call, not a downgrade.
 
 ## Decision order
 
@@ -39,7 +39,8 @@ either is false, subagents are the right call, not a downgrade.
 2. Two or more agents: do they need to exchange information mid-task (challenge findings,
    resolve conflicts, hand off partial state)? → if yes, **agent team**; if no — only the
    final results combine — **subagent** is enough and cheaper.
-3. Are the team tools unavailable? → **subagent fallback**, using the mapping below.
+3. Are the team tools unavailable (flag unset, or the tools absent at runtime)? → **subagent**,
+   using the mapping below, with a reconcile step where the team would have debated.
 4. Do phases differ markedly in whether coordination helps? → **hybrid**, mode stated per
    phase.
 

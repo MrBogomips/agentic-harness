@@ -66,7 +66,7 @@ route through the tracker. Never mirror the same item's state in both.
    write-back) and whether access is auto-invokable or human-gated (Step 2). Fold the decision
    into the change manifest.
 3. Splice the **Tracker coordination addenda** from `harness-setup`'s
-   `references/orchestrator-template.md` into the chosen template (A / B / C), substituting the
+   `references/orchestrator-template.md` into the orchestrator template, substituting the
    concrete values from the coordination context (Step 5). The generated orchestrator must be
    self-contained — inline the commands; do not leave it pointing at this file.
 4. Record the relationship in the `CLAUDE.md` pointer's **Issue tracking** line — see

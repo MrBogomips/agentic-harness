@@ -38,11 +38,11 @@ hand-back via {contract}. *(omit this line entirely when no SDD system is presen
 **Issue tracking:** {tracker} ({version}) — orchestrator pulls ready work via {ready-work query};
 status written back via {write-back convention}. *(omit this line entirely when no tracker is present)*
 
-**Entry point — applies to every prompt in this repo:** You MUST invoke the
-`{orchestrator-skill-name}` skill *before* responding to any request — new work, a follow-up, a
-re-run, a question, or a change to a previous result. It is the single entry point; do not craft a
-response outside it. The orchestrator decides what happens next: it answers trivial or
-out-of-{domain} requests directly and runs the full team only when the work warrants it.
+**Entry point — applies to every prompt in this repo:** Invoke the `{orchestrator-skill-name}`
+skill before responding to any request: new work, a follow-up, a re-run, a question, or a change to
+a previous result. It is the single entry point, so one place stays responsible for {domain} work
+and its history. It is also cheap for small requests: the orchestrator answers trivial or
+out-of-{domain} prompts directly and runs the full team only when the work warrants it.
 
 **Change history:**
 | Date | Change | Target | Reason |
@@ -50,11 +50,12 @@ out-of-{domain} requests directly and runs the full team only when the work warr
 | {YYYY-MM-DD} | Initial setup | All | — |
 ````
 
-The entry-point directive is a hard gate, not a suggestion — there is no `CLAUDE.md`-level bypass.
-The triage that used to live here ("answer simple questions directly") now lives *inside* the
+The entry-point directive is a hard gate: `CLAUDE.md` holds no bypass. Triage lives *inside* the
 orchestrator's first phase, so a trivial or off-domain prompt still routes through the orchestrator
-and is answered quickly there. This keeps the orchestrator the reliable entry point without spinning
-up a team for every message.
+and is answered quickly there. That keeps the orchestrator the reliable entry point without spinning
+up a team for every message. Write the directive at normal volume, with its reason. `CLAUDE.md` is
+loaded every turn and current models follow it closely, so capitalised MUST/NEVER wording
+over-applies rather than adding reliability.
 
 The spec-process and issue-tracking lines record the **coordination relationship**, not the
 contents — the requirements, plan, and tasks stay in the SDD system's own files, and the issues

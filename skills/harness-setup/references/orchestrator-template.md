@@ -73,8 +73,8 @@ existing result and folds in the change.
 ### Phase 2: form the team
 1. `TeamCreate(team_name, members: [...])` — each member with its name, type, model, and a
    role prompt.
-2. `TaskCreate(tasks: [...])` — roughly five to six tasks per member; declare dependencies
-   with `depends_on`.
+2. `TaskCreate(tasks: [...])` — one task per independently checkable output; declare
+   dependencies with `depends_on`.
 
 ### Phase 3: {the main work}
 Members claim tasks from the shared list and work independently. State the communication

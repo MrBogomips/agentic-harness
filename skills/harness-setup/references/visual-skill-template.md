@@ -62,7 +62,10 @@ Skip the visual when: {ANTI_PATTERNS}
    skill, or read its built-in help, before using it — do not rely on remembered commands.
    Do the same for any `visual-generator`.
 3. **Style, in order:** what the user asks for → the project's design system ({DESIGN_SYSTEM})
-   → the tool's default. State which one you used.
+   → the tool's default. State which one you used. For UI and page output with no design
+   direction, steer away from the generic defaults by name. A vague "avoid a generic look" only
+   swaps one default for another. Do not use: {STYLE_AVOID}. When a first render shows another
+   default the user dislikes, add it to this list.
 4. **Write output to** `{OUTPUT_DIR}`. Assets that other docs link to go under
    `{PUBLISHED_ASSETS_DIR}`.
 5. **Review loop:** render → the user reviews and annotates → revise → repeat until the user
@@ -96,5 +99,6 @@ Skip the visual when: {ANTI_PATTERNS}
 | `{DOMAIN_PATTERNS}`, `{ANTI_PATTERNS}` | `patterns`, as bullets; the briefing's anti-patterns |
 | `{USER_PATTERNS_VERBATIM}` | `user-patterns`, unedited, or "None yet — add your own here." |
 | `{OUTPUT_DIR}`, `{PUBLISHED_ASSETS_DIR}` | `output-dir`; the docs asset directory, e.g. `docs/assets/` |
+| `{STYLE_AVOID}` | the user's named dislikes from the briefing, plus the common defaults: "a cream or off-white background, italic accent words in headlines, numbered 01/02/03 section labels, monospace labels, pill-shaped buttons". Drop any item the design system itself uses |
 | `{ENVIRONMENT_NOTE}` | static-only → "No browser opens where this harness runs: write static files and review them in chat or in the pull request." Otherwise empty. |
 | `{COST_POLICY}` | `cost-policy`, e.g. "Paid generation is not used." or "Ask before each paid generation above {amount}; state the estimated cost." |

@@ -30,6 +30,7 @@ run_test "$TESTS_DIR/validate-versions.sh" "Version Sync"
 run_test "$TESTS_DIR/validate-feedback.sh" "Feedback Format Sync"
 run_test "$TESTS_DIR/validate-doctor.sh" "Harness Doctor Detector"
 run_test "$TESTS_DIR/validate-templates.sh" "Generated Template Lint"
+run_test "$TESTS_DIR/validate-check-generated.sh" "Generated Harness Checker"
 
 echo ""
 echo "================================================"

@@ -14,7 +14,7 @@ fresh laptop, a CI runner — find out whether their machine has what the harnes
   a registry change needs no edit here.
 - **Read-only.** It reports and proposes; installing goes through harness setup's approved
   change manifest, one pinned command at a time.
-- **Self-contained.** No `${CLAUDE_PLUGIN_ROOT}` path; the Step 5 placeholder check applies.
+- **Self-contained.** No `${CLAUDE_PLUGIN_ROOT}` path; the Step 5 checker (`scripts/check-generated.sh`) applies.
 
 ## Generated skill — `.claude/skills/{DOMAIN}-setup-check/SKILL.md`
 

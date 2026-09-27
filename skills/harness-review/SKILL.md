@@ -109,9 +109,12 @@ making the call is in `references/usage-assessment.md`. This step is strictly re
 
 ## Step 5: Validate
 
-- **Structural.** Agents are files in the right place (including built-in types); skill
-  frontmatter has `name` and `description`; cross-references between agents are consistent;
-  no `commands/` directory was generated.
+- **Structural.** Run the read-only checker,
+  `bash ${CLAUDE_PLUGIN_ROOT}/skills/harness-setup/scripts/check-generated.sh "$PWD"`, which
+  covers frontmatter, leaked template slots, plugin-path references, a stray `commands/`
+  directory, and flags copied into the visuals skill. Then confirm by reading that agents are
+  files in the right place (including built-in types) and that cross-references between
+  agents are consistent.
 - **Triggering.** For each skill description, write should-trigger and should-NOT-trigger
   queries — the should-NOT set built from near-misses, including ones that belong to a
   *different* skill. Confirm the descriptions separate cleanly and don't collide. The method

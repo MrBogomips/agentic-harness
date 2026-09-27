@@ -22,9 +22,9 @@ the SKILL.md (Step 0.5, Step 2b, Step 5).
    `human-tracker` role in the orchestrator's `tools.md` — never a hard tool name. If that
    role is not yet registered, register it in the same manifest (the per-SaaS access path
    is in the protocol doc's map).
-3. **Placeholder check.** After writing, run the Step 5 placeholder verification over every
-   generated file — any unsubstituted `{PLACEHOLDER}` or `${CLAUDE_PLUGIN_ROOT}` reference
-   fails the run.
+3. **Placeholder check.** After writing, run the Step 5 checker (`scripts/check-generated.sh`).
+   It covers the sync skill, agent, and the `mapping.md` config under the skill. Any
+   unsubstituted slot or `${CLAUDE_PLUGIN_ROOT}` reference fails the run.
 4. **Gitignore.** Add `.tracker-sync/reports/` to the project's `.gitignore` (one manifest
    row).
 

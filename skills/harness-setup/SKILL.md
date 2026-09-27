@@ -329,13 +329,19 @@ When extending rather than building new, modify the existing orchestrator — do
 second one. Reflect a new agent in the team composition, task assignment, data flow, and
 trigger keywords.
 
-**Verify generation before declaring it complete.** After writing the generated artifacts —
-the orchestrator and, when the sync sub-step ran, the sync skill, agent, and sync config —
-grep **every written file** for unsubstituted `{PLACEHOLDER}` tokens and for
-`${CLAUDE_PLUGIN_ROOT}` references. Any hit fails the run: fix the file and re-verify before
-moving to Step 6. Generated files must be self-contained — a leaked placeholder or plugin
-path surfaces later inside the target project, at worst in a scheduled headless run that
-fails with nobody watching.
+**Verify generation before declaring it complete.** After writing the generated artifacts,
+run the checker against the project:
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/skills/harness-setup/scripts/check-generated.sh "$PWD"
+```
+
+It is read-only and fails on any unsubstituted template slot, any `${CLAUDE_PLUGIN_ROOT}`
+reference, an agent or skill file without `name` + `description` frontmatter, a
+`.claude/commands/` directory, or a CLI flag copied into the visuals skill. Any failure blocks
+Step 6: fix the file and re-run until it passes. Generated files must be self-contained,
+because a leaked placeholder or plugin path surfaces later inside the target project, at worst
+in a scheduled headless run that fails with nobody watching.
 
 Then **register the pointer** in the project's `CLAUDE.md`: goal, the **entry-point directive**
 (the hard gate that makes the orchestrator the single entry point — every prompt routes through
@@ -372,14 +378,14 @@ Before calling a setup or change complete:
 
 - [ ] The full change manifest (agents / skills / orchestrator / pointer / tools to create /
       update / remove / install / uninstall) was formally approved before any write.
+- [ ] `scripts/check-generated.sh` passes on the project (placeholders, self-containment,
+      frontmatter, no `commands/`, no copied flags).
 - [ ] Every agent is a file under `.claude/agents/` — including built-in types.
-- [ ] Skills exist under `.claude/skills/` with valid `name` + `description` frontmatter.
 - [ ] One orchestrator, built from the single template: each phase has an owner, inputs,
       outputs, and a "done when"; plus a failure policy and test scenarios.
 - [ ] Execution mode is stated (team / subagent / hybrid; per-phase if hybrid) with exactly the
       matching mechanics inlined, and the subagent fallback covered whenever a team is used.
 - [ ] Each agent sets `effort` for its role, and `model` is `inherit` unless the role needs a different model (then an alias, not a pinned id).
-- [ ] No `commands/` directory was generated.
 - [ ] No conflict with existing agents or skills.
 - [ ] Skill and orchestrator descriptions are pushy and include follow-up keywords.
 - [ ] The orchestrator description opens by asserting it is the entry point for the domain
@@ -393,8 +399,6 @@ Before calling a setup or change complete:
 - [ ] If a tracker is present: phase 0 pulls ready work or creates the issue, integrate writes
       status back, each item's work state has exactly one owner, and no issue content is copied
       into `_agents_workspace/`.
-- [ ] Every generated artifact passed the placeholder check — no unsubstituted `{PLACEHOLDER}`
-      token or `${CLAUDE_PLUGIN_ROOT}` reference remains in any written file.
 - [ ] If the dual-tracker sync sub-step ran: it was offered only because both an agentic and a
       human tracker are present/declared; the sync preflight validated both entry points before
       anything was generated; the sync config is complete (confirmed state table, intake filter,
@@ -409,7 +413,7 @@ Before calling a setup or change complete:
       tools are registered by role (with alternatives) in the orchestrator's `tools.md`.
 - [ ] Every install row was pinned and approved one command at a time, with provenance shown.
 - [ ] If the visuals sub-step returned a stack: `{domain}-visuals` exists, embeds the user's
-      patterns verbatim, and contains no copied tool commands or flags.
+      patterns verbatim, and records choices rather than tool instructions.
 - [ ] If `tools.md` has rows: `{domain}-setup-check` exists and works without the plugin.
 
 ## References
@@ -429,6 +433,7 @@ Before calling a setup or change complete:
 - `references/visual-skill-template.md` — the generated `{domain}-visuals` skill.
 - `references/setup-check-template.md` — the generated, self-contained `{domain}-setup-check`
   skill.
+- `scripts/check-generated.sh` — the read-only lint run at the end of Step 5.
 - `visual-advisor` and `harness-doctor` (sibling skills) — the visual stack choice and the
   read-only system check with the install safety contract.
 - `references/tracker-sync-template.md` — what the dual-tracker sync sub-step generates: the

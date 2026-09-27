@@ -19,7 +19,7 @@ into a skill.
 3. **User patterns verbatim.** Paste what the user said in the briefing exactly; it outranks the
    defaults and is the part of the skill most likely to be edited later by the user.
 4. **Self-contained.** No `${CLAUDE_PLUGIN_ROOT}` path, no reference to plugin files. The Step 5
-   placeholder check applies.
+   checker (`scripts/check-generated.sh`) applies.
 5. **Gitignore.** If the review surface writes working files (for lavish, `.lavish/`), ask
    whether they belong in git; if not, add one `.gitignore` manifest row.
 

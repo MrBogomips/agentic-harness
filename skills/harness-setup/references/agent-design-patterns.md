@@ -25,9 +25,10 @@ doc — read that before designing the team. The short version:
   shared task list (`TaskCreate`). Use it when agents need to exchange information while they
   work: sharing findings, challenging each other, reconciling conflicts. Only one team is
   active per session, but a team can be disbanded between phases and a new one formed. The
-  team tools are experimental — always design a subagent fallback.
-- **Subagent** — the orchestrator spawns each agent with the `Agent` tool; the agent returns
-  its result and does not talk to siblings. Use it for a single agent, or for independent
+  team tools are experimental and off unless `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, so
+  always design a subagent fallback.
+- **Subagent** (the default) — the orchestrator spawns each agent with the `Agent` tool; the
+  agent returns its result and does not talk to siblings. Use it for a single agent, or for independent
   jobs where only the combined result matters. Parallelize with `run_in_background`.
 
 Each pattern below notes whether a team earns its cost or a subagent is the better fit.
@@ -59,7 +60,7 @@ Independent work in parallel, then integration.
 Fits when one input needs several independent perspectives. The integration stage governs
 final quality. This is the most natural fit for a team: members surface findings to each
 other and one member's discovery can redirect another's work mid-flight, which a set of
-isolated subagents cannot do. Build it as a team when the tools allow.
+isolated subagents cannot do. Build it as a team when the tools are enabled.
 
 ### Expert Pool
 
@@ -123,8 +124,8 @@ Real harnesses usually combine patterns:
 | Pipeline + Fan-out | parallelize one stage of a sequence | sequential analysis → parallel build → sequential integration test |
 | Supervisor + Expert Pool | supervisor routes to the right specialist on demand | inbound triage that assigns each case to a domain specialist |
 
-Default composites to a team when members benefit from talking; drop to subagents only for a
-stage that is genuinely isolated and one-off.
+Use a team for the stages whose members benefit from talking (when the tools are enabled), and
+subagents for stages that are isolated.
 
 ## 4. Agent type selection
 
@@ -177,48 +178,48 @@ An agent leverages a skill in one of three ways:
 
 | Way | How | Fits |
 |-----|-----|------|
-| Skill invocation | the agent prompt says to invoke `/skill-name` via the Skill tool | reusable, independently invocable skills |
+| Preload | list the skill under `skills:` in the agent's frontmatter; its full content is injected when the agent starts | a skill the agent needs on every run |
+| Skill invocation | the agent prompt says to invoke `/skill-name` via the Skill tool | a skill the agent needs only for some inputs |
 | Inline | the skill content sits inside the agent definition | short (≤50 lines), exclusive to that agent |
 | Reference load | the agent reads a `references/` file when needed | large, only conditionally relevant content |
 
 ## 7. Agent definition template
 
+An agent file carries what the model cannot infer: the role's goal, the quality bar, the
+contract with its neighbours, and the reasons behind its constraints. It does not carry a
+procedure. The model plans its own steps, and the procedure belongs in a skill. Failure
+handling lives once, in the orchestrator, so do not add per-agent error or timeout sections.
+
 ```markdown
 ---
 name: agent-name
-description: "One or two sentences on the role. List the trigger keywords."
+description: "One or two sentences on the role and when the orchestrator should spawn it."
 model: inherit
+effort: high            # judgment roles high/xhigh; reading/collection roles low/medium
+skills:                 # preloaded on start — skills this agent always needs
+  - skill-name
 ---
 
-# Agent Name — one-line role
+# Agent name — one-line role
 
-You are an expert [role] in [domain].
+{What this agent is for in this project, and who uses its output. One short paragraph of
+context: the domain, the audience, what "good" looks like here.}
 
-## Core role
-1. ...
-2. ...
+## Responsibilities
+- {what it owns — and, where it helps, what it deliberately does not}
 
-## Working principles
-- ...
+## Contract
+- Input: {path or source, and what it contains}
+- Output: {path, format, and structure}
+- Done when: {the checkable condition that makes the output complete}
 
-## Input / output protocol
-- Input: where it reads from, and what
-- Output: where it writes, and what
-- Format: file format and structure
+## Constraints
+- {a real constraint, with its reason}
 
-## Team communication protocol   (team mode only)
-- Receives: from whom, and what
-- Sends: to whom, and what
-- Claims: what it takes from the shared task list
-
-## Error handling
-- on failure: ...
-- on timeout: ...
-
-## Collaboration
-- relationships with the other agents
+## Team communication   (team mode only)
+- Receives from / sends to / claims: {who, what}
 ```
 
-Default `model` to `inherit` so the agent follows the session's model. For a role whose
-quality depends on judgment rather than throughput, pin the strongest reasoning model
-explicitly — by its current dated id (e.g. `claude-opus-4-8`), not a bare `opus` alias that ages.
+Default `model` to `inherit` and tune the role with `effort`, as described in the harness-setup
+Model and effort paragraph. Set an alias (`opus`, `sonnet`, `haiku`) only when the role must
+differ from the session model. Do not pin a full model id: it fixes one release and ages with it.

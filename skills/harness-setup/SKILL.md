@@ -146,9 +146,9 @@ template, the acceptance flow, and the registry schema are in `references/tool-d
 
 ## Step 2: Choose the execution mode and the architecture pattern
 
-**Execution mode.** Default to an **agent team** when two or more agents genuinely need to
-exchange information mid-task; fall back to **subagents** when they do not, or when the
-experimental team tools are unavailable. The team-tools caveat and the mechanical fallback
+**Execution mode.** Default to **subagents**. Choose an **agent team** when two or more agents
+genuinely need to exchange information mid-task *and* the experimental team tools are enabled
+(`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`). Keep a subagent fallback for when they are not. The team-tools caveat and the mechanical fallback
 mapping are in `${CLAUDE_PLUGIN_ROOT}/shared/execution-modes.md` — read it and decide the
 mode before designing the team, because the mode shapes the agent definitions and the
 orchestrator.
@@ -217,16 +217,23 @@ call; put the role, principles, and protocol in the file. The reason is in the h
 model: a role defined only inline is not reusable next session and carries no collaboration
 contract.
 
-Each agent file states: core role, working principles, input/output protocol, error
-handling, and collaboration. In team mode, add a **team communication protocol** section —
-who it messages, who messages it, and what it claims from the shared task list. The
+Each agent file carries what the model cannot infer on its own: the role's purpose and
+quality bar, its responsibilities, its contract (input, output, and a checkable "done when"),
+and the real constraints with their reasons. It carries no step-by-step procedure (that
+belongs in a skill, preloaded through `skills:` when the agent always needs it) and no
+per-agent error section (failure policy lives once, in the orchestrator). In team mode, add a
+**team communication** section: who it messages, who messages it, and what it claims from
+the shared task list. The
 definition template and worked agent files are in `references/agent-design-patterns.md` and
 `references/team-examples.md`.
 
-**Model.** Default each agent to `model: inherit` so it follows the session's model. A
-harness's quality tracks its agents' reasoning, so for a role that depends on judgment rather
-than throughput, pin the strongest reasoning model explicitly — by its current dated id (e.g.
-`claude-opus-4-8`), not a bare `opus` alias that ages.
+**Model and effort.** Default each agent to `model: inherit` so it follows the session's
+model. Tune the role with `effort` (`low` … `max`) rather than by switching models: effort is
+what trades thinking depth against latency and cost on current models. Judgment roles —
+review, design, QA, integration — take `high` or `xhigh`; reading, collection, and formatting
+roles take `low` or `medium`. Set `model` to an alias (`opus`, `sonnet`, `haiku`) only when a
+role must run on a different model than the session. Aliases track the recommended version,
+while a full model id pins one release and ages with it.
 
 **If the team includes a QA agent.** Use the `general-purpose` type (`Explore` is read-only
 and cannot run validation). Make its core method *cross-boundary comparison* — read both
@@ -271,9 +278,10 @@ Two skills are generated from templates rather than designed per project:
 ## Step 5: Build the orchestrator and register the pointer
 
 The orchestrator is a skill whose subject is the team: which agents take part, what each
-produces, how outputs flow, and how failures are handled. Templates for team, subagent, and
-hybrid modes — with data-passing, error handling, and test scenarios — are in
-`references/orchestrator-template.md`.
+produces, how outputs flow, and how failures are handled. The single contract-first template,
+plus the mechanics block to inline for the chosen mode (subagent, team, or hybrid), is in
+`references/orchestrator-template.md`. Specify each phase's owner, inputs, outputs, and
+"done when". Leave the steps inside a phase to the model.
 
 Build into the orchestrator:
 
@@ -321,13 +329,19 @@ When extending rather than building new, modify the existing orchestrator — do
 second one. Reflect a new agent in the team composition, task assignment, data flow, and
 trigger keywords.
 
-**Verify generation before declaring it complete.** After writing the generated artifacts —
-the orchestrator and, when the sync sub-step ran, the sync skill, agent, and sync config —
-grep **every written file** for unsubstituted `{PLACEHOLDER}` tokens and for
-`${CLAUDE_PLUGIN_ROOT}` references. Any hit fails the run: fix the file and re-verify before
-moving to Step 6. Generated files must be self-contained — a leaked placeholder or plugin
-path surfaces later inside the target project, at worst in a scheduled headless run that
-fails with nobody watching.
+**Verify generation before declaring it complete.** After writing the generated artifacts,
+run the checker against the project:
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/skills/harness-setup/scripts/check-generated.sh "$PWD"
+```
+
+It is read-only and fails on any unsubstituted template slot, any `${CLAUDE_PLUGIN_ROOT}`
+reference, an agent or skill file without `name` + `description` frontmatter, a
+`.claude/commands/` directory, or a CLI flag copied into the visuals skill. Any failure blocks
+Step 6: fix the file and re-run until it passes. Generated files must be self-contained,
+because a leaked placeholder or plugin path surfaces later inside the target project, at worst
+in a scheduled headless run that fails with nobody watching.
 
 Then **register the pointer** in the project's `CLAUDE.md`: goal, the **entry-point directive**
 (the hard gate that makes the orchestrator the single entry point — every prompt routes through
@@ -364,13 +378,14 @@ Before calling a setup or change complete:
 
 - [ ] The full change manifest (agents / skills / orchestrator / pointer / tools to create /
       update / remove / install / uninstall) was formally approved before any write.
+- [ ] `scripts/check-generated.sh` passes on the project (placeholders, self-containment,
+      frontmatter, no `commands/`, no copied flags).
 - [ ] Every agent is a file under `.claude/agents/` — including built-in types.
-- [ ] Skills exist under `.claude/skills/` with valid `name` + `description` frontmatter.
-- [ ] One orchestrator, with data flow, error handling, and test scenarios.
-- [ ] Execution mode is stated (team / subagent / hybrid; per-phase if hybrid), with the
-      subagent fallback covered when team mode is the default.
-- [ ] Each agent's model is set deliberately (`inherit` by default; a pinned dated model id only where judgment needs it).
-- [ ] No `commands/` directory was generated.
+- [ ] One orchestrator, built from the single template: each phase has an owner, inputs,
+      outputs, and a "done when"; plus a failure policy and test scenarios.
+- [ ] Execution mode is stated (team / subagent / hybrid; per-phase if hybrid) with exactly the
+      matching mechanics inlined, and the subagent fallback covered whenever a team is used.
+- [ ] Each agent sets `effort` for its role, and `model` is `inherit` unless the role needs a different model (then an alias, not a pinned id).
 - [ ] No conflict with existing agents or skills.
 - [ ] Skill and orchestrator descriptions are pushy and include follow-up keywords.
 - [ ] The orchestrator description opens by asserting it is the entry point for the domain
@@ -384,8 +399,6 @@ Before calling a setup or change complete:
 - [ ] If a tracker is present: phase 0 pulls ready work or creates the issue, integrate writes
       status back, each item's work state has exactly one owner, and no issue content is copied
       into `_agents_workspace/`.
-- [ ] Every generated artifact passed the placeholder check — no unsubstituted `{PLACEHOLDER}`
-      token or `${CLAUDE_PLUGIN_ROOT}` reference remains in any written file.
 - [ ] If the dual-tracker sync sub-step ran: it was offered only because both an agentic and a
       human tracker are present/declared; the sync preflight validated both entry points before
       anything was generated; the sync config is complete (confirmed state table, intake filter,
@@ -400,7 +413,7 @@ Before calling a setup or change complete:
       tools are registered by role (with alternatives) in the orchestrator's `tools.md`.
 - [ ] Every install row was pinned and approved one command at a time, with provenance shown.
 - [ ] If the visuals sub-step returned a stack: `{domain}-visuals` exists, embeds the user's
-      patterns verbatim, and contains no copied tool commands or flags.
+      patterns verbatim, and records choices rather than tool instructions.
 - [ ] If `tools.md` has rows: `{domain}-setup-check` exists and works without the plugin.
 
 ## References
@@ -420,6 +433,7 @@ Before calling a setup or change complete:
 - `references/visual-skill-template.md` — the generated `{domain}-visuals` skill.
 - `references/setup-check-template.md` — the generated, self-contained `{domain}-setup-check`
   skill.
+- `scripts/check-generated.sh` — the read-only lint run at the end of Step 5.
 - `visual-advisor` and `harness-doctor` (sibling skills) — the visual stack choice and the
   read-only system check with the install safety contract.
 - `references/tracker-sync-template.md` — what the dual-tracker sync sub-step generates: the

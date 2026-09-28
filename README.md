@@ -76,7 +76,7 @@ When a project runs **both** a repo-native tracker and a human-oriented one (Jir
 
 ## Execution modes
 
-`harness-setup` defaults to an **agent team** and falls back to **subagents** when the experimental team tools are unavailable. See [`shared/execution-modes.md`](./shared/execution-modes.md).
+`harness-setup` defaults to **subagents**. It uses an **agent team** when members need to talk mid-task and the experimental team tools are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), and it always keeps a subagent fallback. See [`shared/execution-modes.md`](./shared/execution-modes.md).
 
 ## Feedback loop (kaizen)
 

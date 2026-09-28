@@ -14,7 +14,7 @@ fresh laptop, a CI runner — find out whether their machine has what the harnes
   a registry change needs no edit here.
 - **Read-only.** It reports and proposes; installing goes through harness setup's approved
   change manifest, one pinned command at a time.
-- **Self-contained.** No `${CLAUDE_PLUGIN_ROOT}` path; the Step 5 placeholder check applies.
+- **Self-contained.** No `${CLAUDE_PLUGIN_ROOT}` path; the Step 5 checker (`scripts/check-generated.sh`) applies.
 
 ## Generated skill — `.claude/skills/{DOMAIN}-setup-check/SKILL.md`
 
@@ -23,6 +23,7 @@ fresh laptop, a CI runner — find out whether their machine has what the harnes
 name: {DOMAIN}-setup-check
 description: "Check whether this machine has the tools the {DOMAIN_LABEL} harness needs — the plugins, skills, MCP servers, CLIs, and API-key variables in its tools registry — and explain how to add what is missing. Use on 'check my setup', 'is my environment ready', 'onboard this machine', 'why is tool X unavailable', after cloning the project, or when a harness skill reports a missing tool. Read-only: it installs nothing without approval."
 model: inherit
+effort: low
 ---
 
 # {DOMAIN_LABEL} setup check
